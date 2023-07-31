@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def config_initialise(
-    config, molecules, num_particles, geometry, num_images, pixel_size
+    config, molecules, num_particles, geometry, num_images, pixel_size, final_binning=1
 ):
     shape = {"plane": "cuboid", "pillar": "cylinder"}[geometry]
 
@@ -29,6 +29,9 @@ def config_initialise(
     else:
         start_angle = -90
         step_angle = 180 / num_images
+
+    image_size = 4000 // final_binning
+    pixel_size = pixel_size * final_binning
 
     num_particles_per_molecule = num_particles // len(molecules)
     pdb = [
@@ -47,8 +50,8 @@ def config_initialise(
                     "energy_spread": 2.66e-06,
                 },
                 "detector": {
-                    "nx": 4000,
-                    "ny": 4000,
+                    "nx": image_size,
+                    "ny": image_size,
                     "pixel_size": pixel_size,
                     "origin": [3000, 3000],
                 },
@@ -118,7 +121,8 @@ def simulate_and_reconstruct_single(
     exit_wave = os.path.join(data_directory, "exit_wave.mrc")
     optics = os.path.join(data_directory, "optics.mrc")
     image = os.path.join(data_directory, "image.mrc")
-    config_rebinned = os.path.join(data_directory, "config.yaml")
+    config_rebinned = os.path.join(data_directory, "config_rebinned.yaml")
+    image_rebinned = os.path.join(data_directory, "config_rebinned.yaml")
     rec = os.path.join(data_directory, "rec.mrc")
 
     # Setup the config file
@@ -149,20 +153,27 @@ def simulate_and_reconstruct_single(
         parakeet.command_line.simulate.image(["-c", config, "-o", optics, "-i", image])
 
     # Setup the config file
-    if not os.path.exists(config):
+    if not os.path.exists(config_rebinned):
         config_initialise(
-            config,
+            config_rebinned,
             molecules,
             num_particles,
             geometry,
             num_images,
-            pixel_size * final_binning,
+            pixel_size,
+            final_binning,
+        )
+
+    # Rebin the image
+    if not os.path.exists(image_rebinned):
+        parakeet.command_line.export(
+            [image, "-o", image_rebinned, "--rebin=%d" % final_binning]
         )
 
     # Do the reconstruction
     if not os.path.exists(rec):
         parakeet.command_line.analyse.reconstruct(
-            ["-c", config, "-i", image, "-r", rec]
+            ["-c", config_rebinned, "-i", image_rebinned, "-r", rec]
         )
 
 
