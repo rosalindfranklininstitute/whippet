@@ -56,6 +56,13 @@ def get_parser(parser: ArgumentParser = None) -> ArgumentParser:
         default=False,
         help="Print out more information",
     )
+    parser.add_argument(
+        "--new_config",
+        dest="new_config",
+        action="store_true",
+        default=False,
+        help="Generate a new configuration",
+    )
 
     # Return the parser
     return parser
@@ -77,8 +84,11 @@ def main_impl(args):
         level = logging.INFO
     logging.basicConfig(level=level, format="%(msg)s")
 
-    # Simulate and reconstruct
-    simulate_and_reconstruct(config.load(args.config))
+    # Generate a new configuration or simulate
+    if args.new_config:
+        config.save(config.example())
+    else:
+        simulate_and_reconstruct(config.load(args.config))
 
     # Print output
     logger.info("Time taken: %.1f seconds" % (time.time() - start_time))

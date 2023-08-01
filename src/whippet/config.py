@@ -58,6 +58,37 @@ def default() -> Config:
     return Config()
 
 
+def example() -> Config:
+    """
+    Return:
+        The configuration object
+
+    """
+    return Config(
+        **{
+            "molecules": [
+                "1ecy",
+                "1ggg",
+                "1q6u",
+                "1txk",
+                "1urp",
+                "1ydy",
+                "2hph",
+                "2hur",
+                "3i43",
+                "3iaz",
+                "3jyr",
+                "3nzq",
+            ],
+            "num_particles": 100,
+            "geometry": ["pillar", "plane"],
+            "num_images": [40],
+            "pixel_size": 1,
+            "final_binning": 8,
+        }
+    )
+
+
 def save(config: Config, filename: str = "config.yaml", **kwargs):
     """
     Save the configuration file
