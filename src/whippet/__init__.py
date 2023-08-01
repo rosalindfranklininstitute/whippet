@@ -1,4 +1,6 @@
 import logging
+import mrcfile
+import numpy as np
 import os
 import parakeet.config
 import parakeet.command_line.analyse
@@ -124,6 +126,47 @@ def config_initialise(
     parakeet.config.save(config_obj, config)
 
 
+def write_coordinates(sample_filename, rec_filename, coordinates_filename):
+
+    with open(coordinates_filename, "w") as outfile:
+
+        # Get the size of the volume
+        tomo_file = mrcfile.mmap(rec_filename)
+        tomogram = tomo_file.data
+        voxel_size = np.array(
+            (
+                tomo_file.voxel_size["x"],
+                tomo_file.voxel_size["y"],
+                tomo_file.voxel_size["z"],
+            )
+        )
+        assert voxel_size[0] == voxel_size[1]
+        assert voxel_size[0] == voxel_size[2]
+        size = np.array(tomogram.shape)[[2, 0, 1]] * voxel_size
+
+        # Open sample and get the centre
+        sample = parakeet.sample.Sample(sample_filename)
+        centre = np.array(sample.centre)
+
+        # Write out the coordinates in (X, Y, Z). The axes of the reconstruction are (Y, Z, X)
+        for molecule, (_, positions, orientations) in sample.iter_molecules():
+            for position, orientation in zip(positions, orientations):
+                position = position - (centre - size / 2.0)
+                position[2] = size[2] - position[2]
+                outfile.write(
+                    "%s, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f\n"
+                    % (
+                        molecule,
+                        position[0],
+                        position[1],
+                        position[2],
+                        orientation[0],
+                        orientation[1],
+                        orientation[2],
+                    )
+                )
+
+
 def simulate_and_reconstruct_single(
     molecules, num_particles, geometry, num_images, pixel_size, final_binning
 ):
@@ -142,6 +185,7 @@ def simulate_and_reconstruct_single(
     config_rebinned = os.path.join(data_directory, "config_rebinned.yaml")
     image_rebinned = os.path.join(data_directory, "image_rebinned.mrc")
     rec = os.path.join(data_directory, "rec.mrc")
+    coordinates = os.path.join(data_directory, "coords.csv")
 
     # Setup the config file
     if not os.path.exists(config):
@@ -193,6 +237,10 @@ def simulate_and_reconstruct_single(
         parakeet.command_line.analyse.reconstruct(
             ["-c", config_rebinned, "-i", image_rebinned, "-r", rec]
         )
+
+    # Extract the coordinates
+    if not os.path.exists(coordinates):
+        write_coordinates(sample, rec, coordinates)
 
 
 def simulate_and_reconstruct(config: Config):
