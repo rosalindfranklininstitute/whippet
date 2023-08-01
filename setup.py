@@ -20,7 +20,7 @@ def main():
         packages=find_packages(where="src"),
         install_requires=[
             "numpy",
-            "python-parakeet @ git+https://github.com/rosalindfranklininstitute/parakeet@main#egg=python-parakeet",
+            "python-parakeet @ git+https://github.com/rosalindfranklininstitute/parakeet@master#egg=python-parakeet",
         ],
         entry_points={"console_scripts": ["whippet=whippet.command_line:main"]},
         include_package_data=True,
