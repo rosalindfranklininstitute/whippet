@@ -5,6 +5,7 @@ import parakeet.command_line.analyse
 import parakeet.command_line.sample
 import parakeet.command_line.simulate
 from whippet.config import Config
+from math import sqrt, ceil
 
 
 __all__ = ["simulate"]
@@ -26,14 +27,30 @@ def config_initialise(
     if shape == "cuboid":
         start_angle = -60
         step_angle = 120 / num_images
+        thickness = 1500
+        d2 = 4000 * pixel_size / 2.0
+        l2 = thickness / 2.0
+        o2 = 12000 - 2000 * pixel_size
+        margin = [
+            max(0, d2 - d2 / sqrt(2)) + o2 + 100,
+            o2 + 100,
+            max(0, l2 - d2 / sqrt(2)) + 100,
+        ]
     else:
         start_angle = -90
         step_angle = 180 / num_images
+        thickness = 1500 * 2
+        d2 = 4000 * pixel_size / 2.0
+        l2 = thickness / 2.0
+        o2 = 12000 - 2000 * pixel_size
+        margin = [max(0, l2 - d2), o2 + 100, max(0, l2 - d2)]
 
     image_size = 4000 // final_binning
     pixel_size = pixel_size * final_binning
 
-    num_particles_per_molecule = num_particles // len(molecules)
+    origin = [12000 - 2000 * pixel_size, 12000 - 2000 * pixel_size]
+
+    num_particles_per_molecule = int(ceil(num_particles / len(molecules)))
     pdb = [
         {"id": pdb_id, "instances": num_particles_per_molecule} for pdb_id in molecules
     ]
@@ -53,7 +70,7 @@ def config_initialise(
                     "nx": image_size,
                     "ny": image_size,
                     "pixel_size": pixel_size,
-                    "origin": [3000, 3000],
+                    "origin": origin,
                 },
                 "lens": {
                     "c_10": -30000,
@@ -63,19 +80,20 @@ def config_initialise(
                 },
             },
             "sample": {
-                "box": [12000, 12000, 12000],
-                "centre": [6000, 6000, 6000],
+                "box": [24000, 24000, 24000],
+                "centre": [12000, 12000, 12000],
                 "shape": {
                     "cuboid": {
-                        "length_x": 6000,
-                        "length_y": 6000,
+                        "length_x": 24000,
+                        "length_y": 24000,
                         "length_z": 1500,
                     },
                     "cylinder": {
-                        "length": 8000,
+                        "length": 24000,
                         "radius": 1500,
                     },
                     "type": shape,
+                    "margin": margin,
                 },
                 "molecules": {"pdb": pdb},
             },
@@ -122,7 +140,7 @@ def simulate_and_reconstruct_single(
     optics = os.path.join(data_directory, "optics.mrc")
     image = os.path.join(data_directory, "image.mrc")
     config_rebinned = os.path.join(data_directory, "config_rebinned.yaml")
-    image_rebinned = os.path.join(data_directory, "config_rebinned.yaml")
+    image_rebinned = os.path.join(data_directory, "image_rebinned.mrc")
     rec = os.path.join(data_directory, "rec.mrc")
 
     # Setup the config file
