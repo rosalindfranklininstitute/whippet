@@ -20,7 +20,7 @@ def main():
         packages=find_packages(where="src"),
         install_requires=[
             "numpy",
-            "profet @ git+https://github.com/alan-turing-insitute/profet@main#egg=profet",
+            "profet @ git+https://github.com/alan-turing-institute/profet@main#egg=profet",
             "python-parakeet @ git+https://github.com/rosalindfranklininstitute/parakeet@master#egg=python-parakeet",
         ],
         entry_points={"console_scripts": ["whippet=whippet.command_line:main"]},
