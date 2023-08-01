@@ -15,9 +15,11 @@ This requires the same dependencies as parakeet.
 ## Apptainer (singularity)
 
 ```sh
+
+  apptainer build whippet.sif docker://ghcr.io/rosalindfranklininstitute/whippet:main
+
   function container {
-    apptainer exec --nv --bind=$(pwd):/mnt --pwd=/mnt \
-      docker://ghcr.io/rosalindfranklininstitute/whippet:main $@
+    apptainer exec --nv --bind=$(pwd):/mnt --pwd=/mnt whippet.sif $@
   }
 
   container whippet --new_config
