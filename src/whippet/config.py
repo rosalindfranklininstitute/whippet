@@ -34,19 +34,29 @@ class Config(BaseModel):
 
     """
 
-    molecules: List[str] = Field(None, description="The list of molecules")
-
-    num_particles: int = Field(0, description="The total number of particles")
-
-    geometry: List[str] = Field(None, description="The geometry to use (plane, pillar)")
-
-    num_images: List[int] = Field(None, description="The number of images to simulate")
-
     pixel_size: float = Field(1, description="The pixel size to use (A)")
 
     final_binning: int = Field(
         8, description="The binning for the output reconstruction"
     )
+
+    pdb: List[str] = Field(None, description="The PDB filenames")
+
+    tile_size: float = Field(None, description="The tiling size (A)")
+
+    tile_angle: float = Field(0.0, description="The tiling angle (degrees)")
+
+    all_orientations: bool = Field(
+        False, description="Simulate lamellae with all orientations"
+    )
+
+    thickness: float = Field(1000, description="The thickness of the lamella (A)")
+
+    start_angle: float = Field(60, description="The starting tilt angle (deg)")
+
+    step_angle: float = Field(3, description="The tilt angle step (deg)")
+
+    num_images: int = Field(1, description="The number of images")
 
 
 def default() -> Config:
@@ -66,23 +76,14 @@ def example() -> Config:
     """
     return Config(
         **{
-            "molecules": [
-                "1ecy",
-                "1ggg",
-                "1q6u",
-                "1txk",
-                "1urp",
-                "1ydy",
-                "2hph",
-                "2hur",
-                "3i43",
-                "3iaz",
-                "3jyr",
-                "3nzq",
-            ],
-            "num_particles": 100,
-            "geometry": ["pillar", "plane"],
-            "num_images": [40],
+            "pdb": ["my_file.pdb"],
+            "tile_size": 200,
+            "tile_angle": 5,
+            "all_orientations": True,
+            "thickness": 1000,
+            "start_angle": -60,
+            "step_angle": 3,
+            "num_images": 41,
             "pixel_size": 1,
             "final_binning": 8,
         }
