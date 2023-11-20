@@ -405,7 +405,7 @@ def simulate_and_reconstruct_single(
     # Rebin the image
     if not os.path.exists(image_rebinned):
         parakeet.command_line.export(
-            [optics, "-o", image_rebinned, "--rebin=%d" % final_binning]
+            [image, "-o", image_rebinned, "--rebin=%d" % final_binning]
         )
 
     # Do the reconstruction
