@@ -146,7 +146,7 @@ def config_initialise(
             },
             "simulation": {
                 "division_thickness": 10000,
-                "ice": True,
+                "ice": False,
                 "inelastic_model": None,
                 "mp_loss_width": None,
                 "margin": 100,
@@ -166,11 +166,11 @@ def compute_centre_of_mass(pdb_filename):
     structure = gemmi.read_structure(pdb_filename)
     centre_of_mass = {}
     for model in structure:
-        global_centre_of_mass = model.calculate_center_of_mass().tolist()
+        global_centre_of_mass = np.array(model.calculate_center_of_mass().tolist())
         for chain in model:
             centre_of_mass[chain.name] = list(
-                np.array(global_centre_of_mass)
-                - np.array(chain.calculate_center_of_mass().tolist())
+                np.array(chain.calculate_center_of_mass().tolist())
+                - global_centre_of_mass
             )
 
     return centre_of_mass
@@ -211,19 +211,19 @@ def write_coordinates(
         # Write out the coordinates in (X, Y, Z). The axes of the reconstruction are (Y, Z, X)
         for molecule, (_, positions, orientations) in sample.iter_molecules():
             for position, orientation in zip(positions, orientations):
+                print(position, centre, size / 2.0)
                 position = position - (centre - size / 2.0)
-                position[2] = size[2] - position[2]
                 for chain, com in centre_of_mass.items():
 
                     # Rotate the relative position to find the position of the
                     # particle within the volume
                     p = np.matmul(R.from_rotvec(orientation).as_matrix(), com)
                     p = position + p
+                    p[2] = size[2] - p[2]
                     p = p / voxel_size
 
                     # Only print out particles in the volume
                     if np.all((p > 0) & (p < size)):
-
                         outfile.write(
                             "%s, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f\n"
                             % (
@@ -273,9 +273,9 @@ def average_particles(rec, coordinates, pdb_filename, average_prefix):
     average = {}
     count = {}
     for name, size in particle_size.items():
-        shape = np.ceil(np.array([2 * size * 2 * np.sqrt(2)] * 3) / voxel_size).astype(
-            int
-        )
+        shape = np.ceil(
+            np.array([1 * 1 * 2 * size * np.sqrt(2)] * 3) / voxel_size
+        ).astype(int)
         average[name] = np.zeros(shape)
         count[name] = 0
 
@@ -299,10 +299,10 @@ def average_particles(rec, coordinates, pdb_filename, average_prefix):
                 and (y0 >= 0)
                 and (z0 >= 0)
                 and (x1 <= tomo_file.data.shape[2])
-                and (y1 <= tomo_file.data.shape[1])
-                and (z1 <= tomo_file.data.shape[0])
+                and (z1 <= tomo_file.data.shape[1])
+                and (y1 <= tomo_file.data.shape[0])
             ):
-                particle = tomo_file.data[z0:z1, y0:y1, x0:x1]
+                particle = tomo_file.data[y0:y1, z0:z1, x0:x1]
 
                 average[name] += particle
                 count[name] += 1
