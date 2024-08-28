@@ -21,7 +21,7 @@ def main():
         install_requires=[
             "numpy",
             "profet @ git+https://github.com/alan-turing-institute/profet@main#egg=profet",
-            "python-parakeet @ git+https://github.com/rosalindfranklininstitute/parakeet@main#egg=python-parakeet",
+            "python-parakeet==v0.5.3",
         ],
         entry_points={"console_scripts": ["whippet=whippet.command_line:main"]},
         include_package_data=True,
