@@ -37,13 +37,19 @@ def config_initialise(
     # Tilt the tiling pattern to avoid aligning exactly along pixels
     rotation = R.from_rotvec((0, 0, np.radians(tile_angle)))
 
-    # Comput the orientation to put each face up
+    # Compute the orientation to put each face up
     orientation = {
+        # no rotation
         0: np.array((0, 0, 0)),
+        #   rotation of 90 degrees around the X-axis
         1: np.array((1, 0, 0)) * np.pi / 2,
+        # rotation of -90 degrees around the X-axis
         2: np.array((1, 0, 0)) * -np.pi / 2,
+        # rotation of 90 degrees around the Y-axis
         3: np.array((0, 1, 0)) * np.pi / 2,
+        # rotation of -90 degrees around the Y-axis
         4: np.array((0, 1, 0)) * -np.pi / 2,
+        # rotation of 180 degrees around the X-axis
         5: np.array((1, 0, 0)) * 2 * np.pi / 2,
     }[orientation]
 
@@ -137,7 +143,7 @@ def config_initialise(
             "scan": {
                 "axis": [0, 1, 0],
                 "exposure_time": 1,
-                "mode": "tilt_series",
+                "mode": "dose_symmetric",
                 "num_images": num_images,
                 "start_angle": start_angle,
                 "start_pos": 0,
@@ -146,13 +152,13 @@ def config_initialise(
             },
             "simulation": {
                 "division_thickness": 10000,
-                "ice": False,
+                "ice": True,                       #
                 "inelastic_model": None,
                 "mp_loss_width": None,
                 "margin": 100,
                 "padding": 100,
-                "radiation_damage_model": False,
-                "sensitivity_coefficient": 0.014,
+                "radiation_damage_model": True,    #
+                "sensitivity_coefficient": 0.022,
                 "slice_thickness": 5.0,
             },
         }
