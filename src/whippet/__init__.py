@@ -57,7 +57,7 @@ def config_initialise(
     orientation = AxB(rotation, R.from_rotvec(orientation))
 
     # Split the dose over the number of images
-    dose = 140 / num_images
+    dose = 175 / num_images
 
     # Compute the image size and pixel size
     image_size = 4000 // final_binning
@@ -102,7 +102,7 @@ def config_initialise(
             "microscope": {
                 "beam": {
                     "electrons_per_angstrom": dose,
-                    "energy": 300,
+                    "energy": 300,                   #
                     "illumination_semiangle": 0.02,
                     "acceleration_voltage_spread": 8.0e-07,
                     "energy_spread": 2.66e-06,
@@ -142,7 +142,7 @@ def config_initialise(
             },
             "scan": {
                 "axis": [0, 1, 0],
-                "exposure_time": 1,
+                "exposure_time": 1.67,
                 "mode": "dose_symmetric",
                 "num_images": num_images,
                 "start_angle": start_angle,
@@ -158,7 +158,7 @@ def config_initialise(
                 "margin": 100,
                 "padding": 100,
                 "radiation_damage_model": True,    #
-                "sensitivity_coefficient": 0.022,
+                "sensitivity_coefficient": 0.022,   #
                 "slice_thickness": 5.0,
             },
         }
