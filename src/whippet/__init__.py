@@ -60,7 +60,7 @@ def config_initialise(
     dose = 175 / num_images
 
     # Compute the image size and pixel size
-    image_size = 4000 // final_binning
+    image_size = 4096 // final_binning
     pixel_size = pixel_size * final_binning
 
     # Compute the lenght and centre of the sample space

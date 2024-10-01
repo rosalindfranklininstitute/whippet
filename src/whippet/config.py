@@ -52,7 +52,7 @@ class Config(BaseModel):
 
     thickness: float = Field(1000, description="The thickness of the lamella (A)")
 
-    start_angle: float = Field(60, description="The starting tilt angle (deg)")
+    start_angle: float = Field(51, description="The starting tilt angle (deg)")
 
     step_angle: float = Field(3, description="The tilt angle step (deg)")
 
@@ -81,9 +81,9 @@ def example() -> Config:
             "tile_angle": 5,
             "all_orientations": True,
             "thickness": 1000,
-            "start_angle": -71,
+            "start_angle": -51,
             "step_angle": 3,
-            "num_images": 36,
+            "num_images": 35,
             "pixel_size": 1.9,
             "final_binning": 8,
         }
