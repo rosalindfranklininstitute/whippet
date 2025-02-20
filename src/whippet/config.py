@@ -34,7 +34,7 @@ class Config(BaseModel):
 
     """
 
-    pixel_size: float = Field(1, description="The pixel size to use (A)")
+    pixel_size: float = Field(1.9, description="The pixel size to use (A)")
 
     final_binning: int = Field(
         8, description="The binning for the output reconstruction"
@@ -52,7 +52,7 @@ class Config(BaseModel):
 
     thickness: float = Field(1000, description="The thickness of the lamella (A)")
 
-    start_angle: float = Field(60, description="The starting tilt angle (deg)")
+    start_angle: float = Field(51, description="The starting tilt angle (deg)")
 
     step_angle: float = Field(3, description="The tilt angle step (deg)")
 
@@ -81,10 +81,10 @@ def example() -> Config:
             "tile_angle": 5,
             "all_orientations": True,
             "thickness": 1000,
-            "start_angle": -60,
+            "start_angle": -51,
             "step_angle": 3,
-            "num_images": 41,
-            "pixel_size": 1,
+            "num_images": 35,
+            "pixel_size": 1.9,
             "final_binning": 8,
         }
     )
