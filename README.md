@@ -1,5 +1,6 @@
 # whippet
 
+A quick script for simulating stuff for Mark and Nikolai.
 
 # Installation
 
