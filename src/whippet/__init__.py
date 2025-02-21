@@ -262,6 +262,9 @@ def compute_particle_size(pdb_filename):
 
 def average_particles(rec, coordinates, pdb_filename, average_prefix):
 
+    def is_average_valid(average, rec, coordinates):
+        return os.path.exists(average) and (os.path.getmtime(average) >= os.path.getmtime(rec)) and (os.path.getmtime(average) >= os.path.getmtime(coordinates))
+
     # Get the reconstruction
     tomo_file = mrcfile.open(rec)
     voxel_size = np.array(
@@ -315,7 +318,7 @@ def average_particles(rec, coordinates, pdb_filename, average_prefix):
 
     for name in average:
         filename = "%s_%s.mrc" % (average_prefix, name)
-        if not os.path.exists(filename):
+        if not is_average_valid(filename, rec, coordinates):
             print("%s: writing average of %d particles" % (name, count[name]))
             data = average[name] / count[name]
             handle = mrcfile.new(filename, overwrite=True)
@@ -335,6 +338,40 @@ def simulate_and_reconstruct_single(
     pixel_size,
     final_binning,
 ):
+
+    def is_younger_than(a, b):
+        return os.path.getmtime(a) >= os.path.getmtime(b)
+
+    def is_image_data_valid(a, config):
+        scan = parakeet.scan.new(**parakeet.config.load(config).scan.model_dump())
+        h = mrcfile.mmap(a)
+        tilt = h.indexed_extended_header["Alpha tilt"]
+        return not (
+            np.any(np.all(h.data == 0, axis=(1,2))) or 
+            np.any(h.data == np.nan) or 
+            np.any(h.data == np.inf) or 
+            np.all(tilt == 0) or 
+            len(set(tilt)) != len(tilt) or
+            not np.all(np.isclose(tilt, scan.angles))
+        )
+
+    def is_sample_valid(sample, config):
+        return os.path.exists(sample) and is_younger_than(sample, config)
+
+    def is_exit_wave_valid(exit_wave, sample, config):
+        return os.path.exists(exit_wave) and is_younger_than(exit_wave, sample) and is_image_data_valid(exit_wave, config) 
+
+    def is_optics_valid(optics, exit_wave, config):
+        return os.path.exists(optics) and is_younger_than(optics, exit_wave) and is_image_data_valid(optics, config)
+
+    def is_image_valid(image, optics, config):
+        return os.path.exists(image) and is_younger_than(image, optics) and is_image_data_valid(image, config)
+
+    def is_rec_valid(rec, image):
+        return os.path.exists(rec) and is_younger_than(rec, image)
+
+    def is_coordinates_file_valid(coordinates, sample, rec):
+        return os.path.exists(coordinates) and is_younger_than(coordinates, sample) and is_younger_than(coordinates, rec)
 
     # The data directory
     identifier = os.path.basename(filename)
@@ -372,24 +409,24 @@ def simulate_and_reconstruct_single(
         )
 
     # Generate the sample
-    if not os.path.exists(sample):
+    if not is_sample_valid(sample, config):
         parakeet.command_line.sample.new(["-c", config, "-s", sample])
         parakeet.command_line.sample.add_molecules(["-c", config, "-s", sample])
 
     # Simulate the exit wave
-    if not os.path.exists(exit_wave):
+    if not is_exit_wave_valid(exit_wave, sample, config):
         parakeet.command_line.simulate.exit_wave(
             ["-c", config, "-s", sample, "-e", exit_wave]
         )
 
     # Simulate optics
-    if not os.path.exists(optics):
+    if not is_optics_valid(optics, exit_wave, config):
         parakeet.command_line.simulate.optics(
             ["-c", config, "-e", exit_wave, "-o", optics]
         )
 
     # Simulate image
-    if not os.path.exists(image):
+    if not is_image_valid(image, optics, config):
         parakeet.command_line.simulate.image(["-c", config, "-o", optics, "-i", image])
 
     # Setup the config file
@@ -409,19 +446,19 @@ def simulate_and_reconstruct_single(
         )
 
     # Rebin the image
-    if not os.path.exists(image_rebinned):
+    if not is_image_valid(image_rebinned, config_rebinned, config_rebinned):
         parakeet.command_line.export(
             [image, "-o", image_rebinned, "--rebin=%d" % final_binning]
         )
 
     # Do the reconstruction
-    if not os.path.exists(rec):
+    if not is_rec_valid(rec, image_rebinned):
         parakeet.command_line.analyse.reconstruct(
             ["-c", config_rebinned, "-i", image_rebinned, "-r", rec]
         )
 
     # Extract the coordinates
-    if not os.path.exists(coordinates):
+    if not is_coordinates_file_valid(coordinates, sample, rec):
         write_coordinates(sample, rec, coordinates, filename)
 
     # Average the particles
@@ -435,7 +472,7 @@ def simulate_and_reconstruct(config: Config):
     """
 
     def get_orientations(all_orientations):
-        return list(range(6)) if all_orientations else [0]
+        return [3]#list(range(6)) if all_orientations else [0]
 
     # Loop through all the parameters and do the simulation
     for filename in config.pdb:
