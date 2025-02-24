@@ -462,11 +462,11 @@ def simulate_and_reconstruct_single(
         )
 
 
-    # # Do the reconstruction for image
-    # if not is_rec_valid(rec, image_rebinned):
-    #     parakeet.command_line.analyse.reconstruct(
-    #         ["-c", config_rebinned, "-i", image_rebinned, "-r", rec]
-    #     )
+    # Do the reconstruction for image
+    if not is_rec_valid(rec, image_rebinned):
+        parakeet.command_line.analyse.reconstruct(
+            ["-c", config_rebinned, "-i", image_rebinned, "-r", rec]
+        )
     # Do the reconstruction for optics
     if not is_rec_valid(optics_rec, optics_rebinned):
         parakeet.command_line.analyse.reconstruct(
