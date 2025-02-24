@@ -454,11 +454,7 @@ def simulate_and_reconstruct_single(
         parakeet.command_line.export(
             [image, "-o", image_rebinned, "--rebin=%d" % final_binning]
         )
-    # Rebin the Exit_wave
-    if not is_image_valid(exit_wave_rebinned, config_rebinned, config_rebinned):
-        parakeet.command_line.export(
-            [exit_wave, "-o", exit_wave_rebinned, "--rebin=%d" % final_binning]
-        )
+
     # Rebin the Optics
     if not is_image_valid(optics_rebinned, config_rebinned, config_rebinned):
         parakeet.command_line.export(
@@ -466,15 +462,15 @@ def simulate_and_reconstruct_single(
         )
 
 
-    # Do the reconstruction
+    # Do the reconstruction for image
     if not is_rec_valid(rec, image_rebinned):
         parakeet.command_line.analyse.reconstruct(
             ["-c", config_rebinned, "-i", image_rebinned, "-r", rec]
         )
-    # Do the reconstruction
-    if not is_rec_valid(exit_wave_rec, exit_wave_rebinned):
+    # Do the reconstruction for optics
+    if not is_rec_valid(optics_rec, optics_rebinned):
         parakeet.command_line.analyse.reconstruct(
-            ["-c", config_rebinned, "-i", exit_wave_rebinned, "-r", rec]
+            ["-c", config_rebinned, "-i", optics_rebinned, "-r", optics_rec]
         )
 
 
