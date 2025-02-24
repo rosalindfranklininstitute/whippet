@@ -389,6 +389,10 @@ def simulate_and_reconstruct_single(
     image = os.path.join(data_directory, "image.mrc")
     config_rebinned = os.path.join(data_directory, "config_rebinned.yaml")
     image_rebinned = os.path.join(data_directory, "image_rebinned.mrc")
+    exit_wave_rebinned = os.path.join(data_directory, "exit_wave_rebinned.mrc")
+    optics_rebinned = os.path.join(data_directory, "optics_rebinned.mrc")
+    exit_wave_rec = os.path.join(data_directory, "exit_wave_rec.mrc")
+    optics_rec = os.path.join(data_directory, "optics_rec.mrc")
     rec = os.path.join(data_directory, "rec.mrc")
     coordinates = os.path.join(data_directory, "coords.csv")
     average_prefix = os.path.join(data_directory, "average")
@@ -409,21 +413,21 @@ def simulate_and_reconstruct_single(
         )
 
     # Generate the sample
-    if not is_sample_valid(sample, config):
-        parakeet.command_line.sample.new(["-c", config, "-s", sample])
-        parakeet.command_line.sample.add_molecules(["-c", config, "-s", sample])
+    # if not is_sample_valid(sample, config):
+    #     parakeet.command_line.sample.new(["-c", config, "-s", sample])
+    #     parakeet.command_line.sample.add_molecules(["-c", config, "-s", sample])
 
     # Simulate the exit wave
-    if not is_exit_wave_valid(exit_wave, sample, config):
-        parakeet.command_line.simulate.exit_wave(
-            ["-c", config, "-s", sample, "-e", exit_wave]
-        )
+    # if not is_exit_wave_valid(exit_wave, sample, config):
+    #     parakeet.command_line.simulate.exit_wave(
+    #         ["-c", config, "-s", sample, "-e", exit_wave]
+    #     )
 
     # Simulate optics
-    if not is_optics_valid(optics, exit_wave, config):
-        parakeet.command_line.simulate.optics(
-            ["-c", config, "-e", exit_wave, "-o", optics]
-        )
+    # if not is_optics_valid(optics, exit_wave, config):
+    #     parakeet.command_line.simulate.optics(
+    #         ["-c", config, "-e", exit_wave, "-o", optics]
+    #     )
 
     # Simulate image
     if not is_image_valid(image, optics, config):
@@ -450,19 +454,36 @@ def simulate_and_reconstruct_single(
         parakeet.command_line.export(
             [image, "-o", image_rebinned, "--rebin=%d" % final_binning]
         )
+    # Rebin the Exit_wave
+    if not is_image_valid(exit_wave_rebinned, config_rebinned, config_rebinned):
+        parakeet.command_line.export(
+            [exit_wave, "-o", exit_wave_rebinned, "--rebin=%d" % final_binning]
+        )
+    # Rebin the Optics
+    if not is_image_valid(optics_rebinned, config_rebinned, config_rebinned):
+        parakeet.command_line.export(
+            [optics, "-o", optics_rebinned, "--rebin=%d" % final_binning]
+        )
+
 
     # Do the reconstruction
     if not is_rec_valid(rec, image_rebinned):
         parakeet.command_line.analyse.reconstruct(
             ["-c", config_rebinned, "-i", image_rebinned, "-r", rec]
         )
+    # Do the reconstruction
+    if not is_rec_valid(exit_wave_rec, exit_wave_rebinned):
+        parakeet.command_line.analyse.reconstruct(
+            ["-c", config_rebinned, "-i", exit_wave_rebinned, "-r", rec]
+        )
+
 
     # Extract the coordinates
-    if not is_coordinates_file_valid(coordinates, sample, rec):
-        write_coordinates(sample, rec, coordinates, filename)
+    # if not is_coordinates_file_valid(coordinates, sample, rec):
+    #     write_coordinates(sample, rec, coordinates, filename)
 
     # Average the particles
-    average_particles(rec, coordinates, filename, average_prefix)
+    # average_particles(rec, coordinates, filename, average_prefix)
 
 
 def simulate_and_reconstruct(config: Config):
