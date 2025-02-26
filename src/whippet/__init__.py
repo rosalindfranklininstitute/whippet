@@ -413,21 +413,21 @@ def simulate_and_reconstruct_single(
         )
 
     # Generate the sample
-    # if not is_sample_valid(sample, config):
-    #     parakeet.command_line.sample.new(["-c", config, "-s", sample])
-    #     parakeet.command_line.sample.add_molecules(["-c", config, "-s", sample])
+    if not is_sample_valid(sample, config):
+        parakeet.command_line.sample.new(["-c", config, "-s", sample])
+        parakeet.command_line.sample.add_molecules(["-c", config, "-s", sample])
 
     # Simulate the exit wave
-    # if not is_exit_wave_valid(exit_wave, sample, config):
-    #     parakeet.command_line.simulate.exit_wave(
-    #         ["-c", config, "-s", sample, "-e", exit_wave]
-    #     )
+    if not is_exit_wave_valid(exit_wave, sample, config):
+        parakeet.command_line.simulate.exit_wave(
+            ["-c", config, "-s", sample, "-e", exit_wave]
+        )
 
     # Simulate optics
-    # if not is_optics_valid(optics, exit_wave, config):
-    #     parakeet.command_line.simulate.optics(
-    #         ["-c", config, "-e", exit_wave, "-o", optics]
-    #     )
+    if not is_optics_valid(optics, exit_wave, config):
+        parakeet.command_line.simulate.optics(
+            ["-c", config, "-e", exit_wave, "-o", optics]
+        )
 
     # Simulate image
     if not is_image_valid(image, optics, config):
@@ -475,8 +475,8 @@ def simulate_and_reconstruct_single(
 
 
     # Extract the coordinates
-    # if not is_coordinates_file_valid(coordinates, sample, rec):
-    #     write_coordinates(sample, rec, coordinates, filename)
+    if not is_coordinates_file_valid(coordinates, sample, rec):
+        write_coordinates(sample, rec, coordinates, filename)
 
     # Average the particles
     # average_particles(rec, coordinates, filename, average_prefix)
