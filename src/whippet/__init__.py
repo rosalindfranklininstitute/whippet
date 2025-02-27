@@ -472,7 +472,7 @@ def simulate_and_reconstruct(config: Config):
     """
 
     def get_orientations(all_orientations):
-        return [3]#list(range(6)) if all_orientations else [0]
+        return list(range(6)) if all_orientations else [0]
 
     # Loop through all the parameters and do the simulation
     for filename in config.pdb:
