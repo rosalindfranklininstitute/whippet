@@ -23,7 +23,7 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   # IMAGE_NAME: ${{ github.repository }}  ##different name to distingish docker build used
-  IMAGE_NAME: ${{ github.repository_owner }}/whippet_N
+  IMAGE_NAME: ${{ github.repository_owner }}/whippet
 
 
 jobs:
