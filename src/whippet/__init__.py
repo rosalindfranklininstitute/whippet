@@ -389,6 +389,10 @@ def simulate_and_reconstruct_single(
     image = os.path.join(data_directory, "image.mrc")
     config_rebinned = os.path.join(data_directory, "config_rebinned.yaml")
     image_rebinned = os.path.join(data_directory, "image_rebinned.mrc")
+    exit_wave_rebinned = os.path.join(data_directory, "exit_wave_rebinned.mrc")
+    optics_rebinned = os.path.join(data_directory, "optics_rebinned.mrc")
+    exit_wave_rec = os.path.join(data_directory, "exit_wave_rec.mrc")
+    optics_rec = os.path.join(data_directory, "optics_rec.mrc")
     rec = os.path.join(data_directory, "rec.mrc")
     coordinates = os.path.join(data_directory, "coords.csv")
     average_prefix = os.path.join(data_directory, "average")
@@ -451,18 +455,31 @@ def simulate_and_reconstruct_single(
             [image, "-o", image_rebinned, "--rebin=%d" % final_binning]
         )
 
-    # Do the reconstruction
+    # Rebin the Optics
+    if not is_image_valid(optics_rebinned, config_rebinned, config_rebinned):
+        parakeet.command_line.export(
+            [optics, "-o", optics_rebinned, "--rebin=%d" % final_binning]
+        )
+
+
+    # Do the reconstruction for image
     if not is_rec_valid(rec, image_rebinned):
         parakeet.command_line.analyse.reconstruct(
             ["-c", config_rebinned, "-i", image_rebinned, "-r", rec]
         )
+    # Do the reconstruction for optics
+    if not is_rec_valid(optics_rec, optics_rebinned):
+        parakeet.command_line.analyse.reconstruct(
+            ["-c", config_rebinned, "-i", optics_rebinned, "-r", optics_rec]
+        )
+
 
     # Extract the coordinates
     if not is_coordinates_file_valid(coordinates, sample, rec):
         write_coordinates(sample, rec, coordinates, filename)
 
     # Average the particles
-    average_particles(rec, coordinates, filename, average_prefix)
+    # average_particles(rec, coordinates, filename, average_prefix)
 
 
 def simulate_and_reconstruct(config: Config):
